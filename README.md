@@ -10,78 +10,87 @@ This repository is a section of the reinforcement learning module of a larger cr
 
 ---
 
-## 📂 File Overview
+## Features
 
-### 🧠 `RL_brain.py`
-Defines the PPO agent:
-- Uses a shared MLP + LSTM structure for both policy and value estimation.
-- Incorporates `Dropout` and `LayerNorm` for better generalization.
-- Contains `pi()` and `v()` functions for policy and value output.
-- Implements `train_net()` with GAE (Generalized Advantage Estimation) and PPO-Clip loss.
-
-### 🧪 `stock_env.py`
-A custom OpenAI-Gym-style environment for trading:
-- Simulates buy/sell/hold operations with realistic fees and cash handling.
-- Uses a rolling window of technical + sentiment indicators as state.
-- Computes reward based on price movements and trading decisions.
-- Outputs visualizations for trade signals and cumulative profit.
-
-### 🏃 `run_this(ppo).py`
-Main script for:
-- Preprocessing training/testing data
-- Running PPO training loop
-- Periodically saving models, testing performance, and visualizing results
-- Outputs: `.pkl` models, `.npy` profit data, and `.png` plots
+- LSTM-enhanced PPO for time-aware decisions
+- Technical + sentiment features
+- Visualization of trades, rewards, and profits
+- Custom trading environment
+- Supports GPU acceleration with PyTorch
 
 ---
 
-## 🎯 Features
+## Module Justification
 
-- ✅ LSTM-enhanced PPO for time-aware decisions
-- ✅ Technical + sentiment features
-- ✅ Visualization of trades, rewards, and profits
-- ✅ Custom trading environment
-- ✅ Supports GPU acceleration with PyTorch
+### `RL_brain.py` — Core PPO Agent Module
+
+This module implements the Proximal Policy Optimization (PPO) agent used for reinforcement learning. It defines both the policy and value networks, and includes the full training pipeline. Key responsibilities:
+
+- Model Architecture:
+    - Combines `MLP + LSTM` for both feature extraction and temporal modeling.
+    - `pi()` outputs the probability distribution over actions (policy network).
+    - `v()` estimates the expected value of the current state (value network).
+- Core Training Logic `train_net()`:
+    - Computes `Generalized Advantage Estimation (GAE)` to stabilize training.
+    - Constructs `PPO-Clip loss` to restrict policy updates within a trust region.
+    - Optimizes both actor and critic networks simultaneously.
+- Experience Buffer Management:
+    - `put_data()` and `make_batch()` handle collection and batching of experiences.
+    - Experience buffer is cleared after each episode to maintain on-policy training.
+
+### `stock_env.py`
+
+This module simulates a time-aware stock trading environment with technical and sentiment-based features. It serves as the interface between the PPO agent and market simulation. Core features:
+
+- State Representation:
+    - Each state consists of 24 historical time steps of technical indicators + sentiment signals (44 features × 24 = 1056), plus a holding flag → total input dim: 1057.
+    - Provides temporal structure to help the agent capture trading patterns.
+- Action Space:
+    - 3 discrete actions: `Buy`, `Sell`, `Hold/Cash`.
+    - Updates portfolio position based on selected action.
+- Reward Function Design:
+    - Computes return as:
+        `(price[t+1]−price[t])/price[t]`
+    - Includes transaction costs and position penalties.
+    - Encourages profitable trading behavior and penalizes unnecessary trades or missed opportunities.
+- Visualization Support:
+    `draw()` method for plotting trading actions and cumulative returns, useful for backtesting analysis.
+
+### `run_this(ppo).py`
+
+This is the main execution script that integrates agent, environment, training loop, and evaluation. Core functions:
+- Data Preprocessing:
+    - Applies `StandardScaler` to normalize all input features.
+    - Splits the dataset into training and testing sets.
+- PPO Training Loop:
+    - Initializes environments and PPO model.
+    - Interacts with the environment to collect (`state, action, reward, next_state`) tuples.
+    - Stores each interaction using `put_data()` for on-policy learning.
+    - Trains the model using data from the current episode.
+- Model Evaluation and Backtesting:
+    - Every 10 episodes, saves the model and performs backtesting on unseen test data.
+    - Uses `BackTest()` to simulate trades using a greedy strategy (`argmax(prob)`).
+    - Outputs profit, reward trends, and trading behavior plots for comparison.
 
 ---
 
-## 📈 Example Output
+## Example Output
 
+- Reward trends during training
+    ![Train_reward](images/Train_reward.png)
 - Cumulative profit comparison (account vs market)
-- Trade signal visualization (`^` = buy, `v` = sell)
-- Reward trends during training/testing
+    ![profit_Best_test-OHLCV](images/profit_Best_test-OHLCV.png)
+- Multi-Cryptocurrency Backtesting
+    ![Test_value](images/Test_value.png)
 
 ---
 
-## 🧰 How to Run
-
-### 1. Prepare CSV Data
-Make sure the CSV file `BTC_20241031_with_sentiments_2.csv` includes:
-- OHLCV (Open, High, Low, Close, Volume)
-- Technical indicators (MACD, RSI, MA, etc.)
-- Sentiment indicators (Regulatory Impact, Overall Sentiment, etc.)
-
-### 2. Train & Evaluate
-```bash
-python run_this(ppo).py
-```
-
-Models and result plots will be saved to:
-- `model_OHLCV/`
-- `Reward/`
-- `Trade/`
-
----
-
-## 📌 Requirements
+## Requirements
 
 - Python 3.7+
-- PyTorch
-- numpy, pandas, matplotlib
+- PyTorch >= 1.7
+- numpy
+- pandas
+- matplotlib
 - scikit-learn
-
-Install with:
-```bash
-pip install -r requirements.txt
-```
 
