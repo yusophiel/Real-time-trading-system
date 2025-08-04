@@ -1,6 +1,8 @@
 ## Project Overview
 This repository is a section of the reinforcement learning module of a larger cryptocurrency trading system that integrates multi-source sentiment analysis from large language models (LLMs) with deep reinforcement learning. In the full system, LLM-generated sentiment signals are filtered using a “Trust-the-Majority” strategy and dynamically weighted based on the Ebbinghaus Forgetting Curve to reflect their decaying market impact.
 
+![System Framework](images/FrameWork.pdf)
+
 **My contribution focuses on the design and implementation of the downstream reinforcement learning framework.** Specifically, I developed a high-frequency trading module using the Proximal Policy Optimization (PPO) algorithm in PyTorch, augmented with an LSTM-based architecture to capture temporal dependencies in both market data and sentiment signals. 
 - The agent observes a state space constructed from a sliding window of technical indicators (e.g., EMA, MACD, RSI, KDJ) and sentiment scores derived from LLM outputs.
 - To guide the agent’s learning, I designed a composite reward function that incorporates return on investment (ROI) as the primary signal, while introducing a volatility penalty to control excessive risk-taking behavior. The module also implements data normalization (Z-score + outlier truncation), dynamic action sampling, and action interpretation for buy/hold/sell decisions.
