@@ -13,7 +13,7 @@ This repository is a section of the reinforcement learning module of a larger cr
 ## Features
 
 - LSTM-enhanced PPO for time-aware decisions
-- Technical + sentiment features
+- STM-enhanced PPO for time-aware decisions using both technical and LLM-derived sentiment signals
 - Visualization of trades, rewards, and profits
 - Custom trading environment
 - Supports GPU acceleration with PyTorch
