@@ -40,31 +40,31 @@ class stock:
         self.overall_sentiment_x = df['Overall Sentiment_x'].values
 
 
-        self.df = df  # 数据的DataFrame
-        self.init_money = init_money  # 初始化资金
+        self.df = df
+        self.init_money = init_money
 
-        self.window_size = window_size  # 滑动窗口大小
+        self.window_size = window_size
         self.t = self.window_size
-        self.buy_rate = 0.001  # 买入费率
-        self.buy_min = 5  # 最小买入费率
-        self.sell_rate = 0.001  # 卖出费率
-        self.sell_min = 5  # 最大买入费率
-        self.stamp_duty = 0.001  # 印花税
+        self.buy_rate = 0.001
+        self.buy_min = 5
+        self.sell_rate = 0.001
+        self.sell_min = 5
+        self.stamp_duty = 0.001
 
-        self.hold_money = self.init_money  # 持有资金
-        self.buy_num = 0  # 买入数量
-        self.hold_num = 0  # 持有股票数量
-        self.stock_value = 0  # 持有股票总市值
-        self.market_value = 0  # 总市值（加上现金）
-        self.last_value = self.init_money  # 上一天市值
-        self.total_profit = 0  # 总盈利
-        self.reward = 0  # 收益
-        self.states_sell = []  # 卖股票时间
-        self.states_buy = []  # 买股票时间
+        self.hold_money = self.init_money
+        self.buy_num = 0
+        self.hold_num = 0
+        self.stock_value = 0
+        self.market_value = 0
+        self.last_value = self.init_money
+        self.total_profit = 0
+        self.reward = 0
+        self.states_sell = []
+        self.states_buy = []
         self.no_trade_duration = 0
 
-        self.profit_rate_account = []  # 账号盈利
-        self.profit_rate_stock = []  # 股票波动情况
+        self.profit_rate_account = []
+        self.profit_rate_stock = []
 
         self.buy_action = 0
         self.sell_action = 0
@@ -72,24 +72,24 @@ class stock:
         self.hold_action = 0
 
     def reset(self, random, init_money=10000000):
-        self.init_money = init_money  # 初始化资金
-        self.hold_money = self.init_money  # 持有资金
-        self.buy_num = 0  # 买入数量
-        self.hold_num = 0  # 持有股票数量
-        self.stock_value = 0  # 持有股票总市值
-        self.market_value = 0  # 总市值（加上现金）
-        self.last_value = self.init_money  # 上一天市值
-        self.total_profit = 0  # 总盈利
-        self.reward = 0  # 收益
-        self.states_sell = []  # 卖股票时间
-        self.states_buy = []  # 买股票时间
+        self.init_money = init_money
+        self.hold_money = self.init_money
+        self.buy_num = 0
+        self.hold_num = 0
+        self.stock_value = 0
+        self.market_value = 0
+        self.last_value = self.init_money
+        self.total_profit = 0
+        self.reward = 0
+        self.states_sell = []
+        self.states_buy = []
         if random:
             self.t = np.random.randint(self.window_size,(len(self.trend) - 100))
         else:
             self.t = self.window_size
 
-        self.profit_rate_account = []  # 账号盈利
-        self.profit_rate_stock = []  # 股票波动情况
+        self.profit_rate_account = []
+        self.profit_rate_stock = []
         self.no_trade_duration = 0
 
         self.buy_action = 0
@@ -100,7 +100,7 @@ class stock:
         return self.get_state(self.t)
 
 
-    def get_state(self, t):  # 某t时刻的状态
+    def get_state(self, t):
         if self.hold_num > 0 :
             hold_state = 1
         else:
@@ -142,15 +142,11 @@ class stock:
 
         # print(t)
         # print(self.df['open'].iloc[t - 24: t])
-        return np.array(state)  # 作为状态编码
+        return np.array(state)
 
     def buy_stock(self):
-        # 买入股票
-
-
         self.buy_num = self.hold_money * (1 - self.buy_rate ) / (self.trend[self.t])  # 买入手数
 
-        # 计算手续费等
         tmp_money = self.trend[self.t] * self.buy_num * self.buy_rate
 
         self.hold_num += self.buy_num
@@ -181,28 +177,21 @@ class stock:
             return False
 
     def step(self, action, random, steps, show_log=False):
-
-
-        # 0: 持有并卖出
-        # 1: 持有不卖出
-        # 2: 不持有
-
+        # 0: Hold and sell
+        # 1: Hold and do not sell
+        # 2: Not hold
         if action == 1 and self.hold_money >= (self.trend[self.t]):
             buy_ = True
-            # 买入
             action_state = 3
             self.no_trade_duration = 0
             self.buy_action += 1
-            # 买入股票
             self.buy_stock()
             if show_log:
                 print('day:%d, buy price:%f, buy num:%d, hold num:%d, hold money:%.3f' % \
                       (self.t, self.trend[self.t], self.buy_num, self.hold_num, self.hold_money))
         elif action == 2 and self.hold_num > 0:
-            # 持有并卖出
             action_state = 0
             self.no_trade_duration = 0
-            # 卖出股票
             self.sell_action += 1
 
             self.sell_stock(self.hold_num)
@@ -217,14 +206,11 @@ class stock:
             #         % (self.t, self.trend[self.t], self.hold_money)
             #     )
         else:
-            # 无事发生
             self.no_trade_duration += 1
             if self.hold_num > 0:
-                # 持有不动
                 self.hold_action += 1
                 action_state = 1
             else:
-                # 不持有不动
                 self.not_hold_action += 1
                 action_state = 2
 
@@ -245,27 +231,21 @@ class stock:
         # market_value_change_reward = (self.market_value - self.last_value) / self.last_value
         # long_term_reward = self.total_profit / self.init_money
 
-        # 可以根据策略权重进行调整
         # reward = 0.5 * price_change_reward
         reward = price_change_reward
 
-        # 持有并卖出
         if action_state == 0:
             # self.reward = -reward - 0.01 + 0.5 * long_term_reward
             self.reward = -reward - 0.0001
 
-        # 持有不卖出
         elif action_state == 1:
             if reward>0:
                 self.reward = reward * 0.8
             else:
                 self.reward = reward * 1.2
-            # 不持有买入
         elif action_state == 3:
             # self.reward = reward - 0.01 + 0.5 * long_term_reward
             self.reward = reward - 0.0001
-
-            # 不持有
         else:
             if reward > 0:
                 self.reward = -reward * 0.2
@@ -296,7 +276,6 @@ class stock:
         return self.states_sell, self.states_buy, self.profit_rate_account, self.profit_rate_stock
 
     def draw(self, save_name1, save_name2):
-        # 绘制结果
         states_sell, states_buy, profit_rate_account, profit_rate_stock = self.get_info()
         invest = profit_rate_account[-1]
         total_gains = self.total_profit

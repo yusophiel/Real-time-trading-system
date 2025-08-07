@@ -43,7 +43,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     file_path = 'BTC_20241031_with_sentiments_2.csv'
     df = pd.read_csv(file_path)
-    df = df.reset_index(drop=True)  # 去除前几天没有均线信息
+    df = df.reset_index(drop=True)
     df["Real_close"] = df["close"]
 
     df_train = df.iloc[:-2000]

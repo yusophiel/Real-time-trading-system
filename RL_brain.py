@@ -32,14 +32,14 @@ class PPO(nn.Module):
         self.fc_v = nn.Linear(fc2_dims, 1)
         #self.optimizer = optim.Adam(self.parameters(), lr=lr, weight_decay=1e-4)
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
-        self.to(device)  # 将网络层移至设备
+        self.to(device)
 
     def pi(self, x, hidden):
         # print(x.to(device).shape)
         x = F.relu(self.fc1(x.to(device)))
         x = x.view(-1, 1, 64)
         x, lstm_hidden = self.lstm(x, hidden)
-        x = self.drop_out(x)  # 在LSTM层后应用dropout
+        x = self.drop_out(x)
         x = F.relu(self.fc2(x))
         x = self.fc_pi(x)
         prob = F.softmax(x, dim=2)
@@ -50,7 +50,7 @@ class PPO(nn.Module):
         x = F.relu(self.fc1(x.to(device)))
         x = x.view(-1, 1, 64)
         x, lstm_hidden = self.lstm(x, hidden)
-        x = self.drop_out(x)  # 在LSTM层后应用dropout
+        x = self.drop_out(x)
         x = F.relu(self.fc2(x))
         v = self.fc_v(x)
         return v
