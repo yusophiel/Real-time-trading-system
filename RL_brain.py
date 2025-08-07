@@ -82,7 +82,6 @@ class PPO(nn.Module):
         return s, a, r, s_prime, done_mask, prob_a, h_in_lst[0], h_out_lst[0]
 
     def train_net(self):
-        #print("update")
         s, a, r, s_prime, done_mask, prob_a, (h1_in, h2_in), (h1_out, h2_out) = self.make_batch()
         first_hidden = (h1_in.detach(), h2_in.detach())
         second_hidden = (h1_out.detach(), h2_out.detach())

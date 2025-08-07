@@ -14,10 +14,10 @@ class stock:
 
     def __init__(self, df, init_money=10000000, window_size=24):
 
-        self.n_actions = 3  # 动作数量
-        self.n_features = (window_size) * 44 + 1  # 特征数量
+        self.n_actions = 3
+        self.n_features = (window_size) * 44 + 1
 
-        self.trend = df['Real_close'].values  # 收盘数据
+        self.trend = df['Real_close'].values
         self.close = df['close'].values
         self.volume = df['volume'].values
         self.high = df['high'].values
